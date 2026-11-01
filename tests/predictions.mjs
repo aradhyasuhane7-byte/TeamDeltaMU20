@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {predictOrders,stageHistory,workingETA} from '../lib/predictions.js';
+const now=Date.UTC(2026,10,1,10),min=60000;
+const history=Array.from({length:10},(_,i)=>({workspace:'w',done:JSON.stringify([{at:now-min,started:now-min-(i+1)*10*min,actor:'employee'}]),meta:'{}'}));
+const o={id:'live',number:'ORDER',workspace:'w',stage:0,entered:now-20*min,limits:'[50,90,60,1440]',done:'[]',meta:'{}'};
+let r=predictOrders(history,[o],{},now)[0];assert.equal(r.samples,10);assert.equal(r.comparable,8);assert.equal(r.remaining,45);assert.equal(r.lateShare,5/8);assert.equal(r.state,'High delay risk');assert(Math.abs(r.eta-(now+45*min))<2);assert(r.low<r.remaining&&r.high>r.remaining);
+assert.equal(predictOrders(history.slice(0,4),[o],{},now)[0].state,'Learning');
+assert.equal(predictOrders(history,[{...o,entered:now-99*min}],{},now)[0].state,'Outside baseline');
+assert.equal(predictOrders(history,[{...o,meta:'{"supplier":123}'}],{},now)[0].state,'Paused');
+assert.equal(predictOrders(history,[{...o,meta:'{"reworks":[{"status":"awaiting-review"}]}'}],{},now)[0].state,'On hold');
+assert.equal(predictOrders(history,[{...o,stage:4},{...o,deleted:1}],{},now).length,0);
+assert.equal(predictOrders(history.map(x=>({...x,workspace:'other'})),[o],{},now)[0].samples,0);
+const bad=[{done:JSON.stringify([null,{manual:true,started:now-min,at:now}])},{done:JSON.stringify([{started:now-100*86400000,at:now-91*86400000}])},{done:JSON.stringify([{started:now,at:now+min}])},{...history[0],meta:'{"reworks":[{"sourceStage":0,"status":"resolved"}]}'},{done:JSON.stringify([{started:now-50*min,at:now,actor:'Imported legacy record'}])}];assert.deepEqual(stageHistory(bad,{},now).map(x=>x.length),[0,0,0,0]);
+assert.equal(stageHistory([{...history[0],deleted:1}],{},now)[0].length,1);
+const paused={...history[0],meta:JSON.stringify({pauses:[{start:now-9*min,end:now-5*min}]})};assert.equal(stageHistory([paused],{},now)[0][0],6);
+assert.equal(stageHistory(Array.from({length:220},()=>history[0]),{},now)[0].length,200);
+// 17:30 IST Monday, work day ends at 18:00. 60 min work ends Tuesday 09:30.
+const monday=Date.UTC(2026,10,2,12);const eta=workingETA(monday,60,{start:9,end:18});assert(Math.abs(eta-Date.UTC(2026,10,3,4))<2);
+const raw=JSON.stringify(history);predictOrders(history,[o],{},now);assert.equal(JSON.stringify(history),raw);
+console.log('Passed prediction medians/ranges, deadline risk, sparse samples, survivor conditioning, holds/pauses, tenant isolation, 90-day/200-record limits, exclusions, archived history, pause subtraction, working-calendar ETA and non-mutation.');
+const {historicalPredictions}=await import('../lib/predictions.js');
+const delivered=Array.from({length:6},(_,i)=>({workspace:'w',stage:4,created:now-(100+i*10)*min,destination:i%2?' Indore ':'indore',meta:'{}',done:JSON.stringify(Array.from({length:4},(_,j)=>({started:now-(80-j*20)*min,at:now-(60-j*20)*min,actor:'worker',lost:j===1?5:0})))}));
+let pattern=historicalPredictions(delivered,{},now);assert.equal(pattern.bottleneck.stage,1);assert.equal(pattern.destinations.length,1);assert.equal(pattern.destinations[0].count,6);assert.equal(pattern.destinations[0].median,125);assert.equal(pattern.destinations[0].delivery,20);
+assert.equal(historicalPredictions(delivered.slice(0,4),{},now).destinations[0].median,null);
+assert.equal(historicalPredictions(delivered.map(o=>({...o,stage:3})),{},now).destinations.length,0);
+assert.equal(historicalPredictions(delivered.map(o=>({...o,done:JSON.stringify(JSON.parse(o.done).map(d=>({...d,manual:true})))})),{},now).destinations.length,0);
+console.log('Passed stage bottleneck ranking, destination normalization, receipt-to-delivery and delivery-stage medians, minimum samples and manual/incomplete exclusions.');

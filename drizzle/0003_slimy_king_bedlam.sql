@@ -1,0 +1,1 @@
+ALTER TABLE `accounts` ADD `workspace` text DEFAULT '' NOT NULL;

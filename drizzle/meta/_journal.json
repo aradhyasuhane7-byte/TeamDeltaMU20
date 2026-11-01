@@ -1,0 +1,104 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1793329963686,
+      "tag": "0000_clammy_shockwave",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793331600703,
+      "tag": "0001_daffy_scalphunter",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793332262230,
+      "tag": "0002_lowly_blade",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1793332414895,
+      "tag": "0003_slimy_king_bedlam",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793333593394,
+      "tag": "0004_nappy_earthquake",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1793334016093,
+      "tag": "0005_watery_spyke",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1793336011828,
+      "tag": "0006_quick_george_stacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1793336461791,
+      "tag": "0007_youthful_ogun",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1793424276163,
+      "tag": "0008_production_workspace",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1793425002958,
+      "tag": "0009_prepared_department_logins",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1793438852127,
+      "tag": "0010_notification_reads",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1793439780949,
+      "tag": "0011_push_subscriptions",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1793512440562,
+      "tag": "0012_photo_review",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1793514662200,
+      "tag": "0013_data_security",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+-- Prepared business logins. Passwords are salted hashes; plaintext is held only in runtime secrets.
+--> statement-breakpoint
+INSERT INTO workspaces(id,name,owner,settings) SELECT 'blindspot-business','Blindspot','direct-owner-aradhya','{"business":"Blindspot","publicReadOnly":true}' WHERE NOT EXISTS(SELECT 1 FROM members WHERE email='aradhyasuhane7@gmail.com' AND role='admin' AND workspace<>'blindspot-demo') AND NOT EXISTS(SELECT 1 FROM workspaces WHERE id='blindspot-business');
+--> statement-breakpoint
+INSERT INTO accounts(id,username,email,workspace,hash,salt,demo) VALUES('f1d23d23-1dc6-4c92-a420-37df8e32083e','bs.admin','aradhyasuhane7@gmail.com',COALESCE((SELECT workspace FROM members WHERE email='aradhyasuhane7@gmail.com' AND role='admin' AND workspace<>'blindspot-demo' ORDER BY workspace LIMIT 1),'blindspot-business'),'062113aaa1168e6299198e3615520e9395c3cd0538162396e0e828a43de9342d','50e841185b1b0d7a95a68800679c1d54b5a8d6f15da86c40',0);
+--> statement-breakpoint
+INSERT OR IGNORE INTO members(id,workspace,email,role) VALUES('72a45f1a-5c7b-4a53-9003-e200a30d5499',COALESCE((SELECT workspace FROM members WHERE email='aradhyasuhane7@gmail.com' AND role='admin' AND workspace<>'blindspot-demo' ORDER BY workspace LIMIT 1),'blindspot-business'),'aradhyasuhane7@gmail.com','admin');
+--> statement-breakpoint
+INSERT INTO accounts(id,username,email,workspace,hash,salt,demo) VALUES('235c398c-884d-4713-becb-53c1d551e3e0','bs.confirm','bs.confirm@accounts.blindspot.invalid',COALESCE((SELECT workspace FROM members WHERE email='aradhyasuhane7@gmail.com' AND role='admin' AND workspace<>'blindspot-demo' ORDER BY workspace LIMIT 1),'blindspot-business'),'90da22da31c4dc9a20e50ac3a668d34a07eab4d71c53aa01893e40977bb370a6','6f36aa9d9ac2d813790306b13e2ae886a0b29b986cb4645e',0);
+--> statement-breakpoint
+INSERT OR IGNORE INTO members(id,workspace,email,role) VALUES('8143d12f-5d15-44dd-a032-7ac9613da0d7',COALESCE((SELECT workspace FROM members WHERE email='aradhyasuhane7@gmail.com' AND role='admin' AND workspace<>'blindspot-demo' ORDER BY workspace LIMIT 1),'blindspot-business'),'bs.confirm@accounts.blindspot.invalid','confirm');
+--> statement-breakpoint
+INSERT INTO accounts(id,username,email,workspace,hash,salt,demo) VALUES('568a7952-f162-48de-bcb4-0c79c01b2061','bs.pack','bs.pack@accounts.blindspot.invalid',COALESCE((SELECT workspace FROM members WHERE email='aradhyasuhane7@gmail.com' AND role='admin' AND workspace<>'blindspot-demo' ORDER BY workspace LIMIT 1),'blindspot-business'),'6eda633353083692bceab3f39f051518840ee7933c25efdbba8b927cc6506d8a','06332b45ac9608660ec20b2db4c4fec8484db0ccad86f295',0);
+--> statement-breakpoint
+INSERT OR IGNORE INTO members(id,workspace,email,role) VALUES('1a9d8816-3660-4c28-9988-0cbc788b7384',COALESCE((SELECT workspace FROM members WHERE email='aradhyasuhane7@gmail.com' AND role='admin' AND workspace<>'blindspot-demo' ORDER BY workspace LIMIT 1),'blindspot-business'),'bs.pack@accounts.blindspot.invalid','pack');
+--> statement-breakpoint
+INSERT INTO accounts(id,username,email,workspace,hash,salt,demo) VALUES('c9c63144-5300-4687-b845-e10b69bf811f','bs.doc','bs.doc@accounts.blindspot.invalid',COALESCE((SELECT workspace FROM members WHERE email='aradhyasuhane7@gmail.com' AND role='admin' AND workspace<>'blindspot-demo' ORDER BY workspace LIMIT 1),'blindspot-business'),'a80441fce3b576552a537a85d2ed2ca4c4155ac25eb6f79d072c10fe4294c10a','d3df372e166fd635741829bd48aceba31a66efba268c7cf6',0);
+--> statement-breakpoint
+INSERT OR IGNORE INTO members(id,workspace,email,role) VALUES('b4b5304e-1ac0-40ef-855d-5cba332f0b08',COALESCE((SELECT workspace FROM members WHERE email='aradhyasuhane7@gmail.com' AND role='admin' AND workspace<>'blindspot-demo' ORDER BY workspace LIMIT 1),'blindspot-business'),'bs.doc@accounts.blindspot.invalid','doc');
+--> statement-breakpoint
+INSERT INTO accounts(id,username,email,workspace,hash,salt,demo) VALUES('013797b1-c50f-48b4-99c6-d71b5aa227da','bs.del','bs.del@accounts.blindspot.invalid',COALESCE((SELECT workspace FROM members WHERE email='aradhyasuhane7@gmail.com' AND role='admin' AND workspace<>'blindspot-demo' ORDER BY workspace LIMIT 1),'blindspot-business'),'9f227304d61658dc1ba211f47aa92c678cf0abc3313e00f182919bf48d3be791','fd3abc877e47d2578deb38f1fb0a23495c1a1d73b2650432',0);
+--> statement-breakpoint
+INSERT OR IGNORE INTO members(id,workspace,email,role) VALUES('e23647f3-b324-4225-9bb1-28f49e2b67e3',COALESCE((SELECT workspace FROM members WHERE email='aradhyasuhane7@gmail.com' AND role='admin' AND workspace<>'blindspot-demo' ORDER BY workspace LIMIT 1),'blindspot-business'),'bs.del@accounts.blindspot.invalid','del');
+--> statement-breakpoint
+INSERT INTO events(id,workspace,order_id,actor,action,at) VALUES('58ae0631-f4f9-4688-a681-5032dfe2bc5f',COALESCE((SELECT workspace FROM members WHERE email='aradhyasuhane7@gmail.com' AND role='admin' AND workspace<>'blindspot-demo' ORDER BY workspace LIMIT 1),'blindspot-business'),'workspace','owner setup','Five prepared department logins initialized',1793425001676);

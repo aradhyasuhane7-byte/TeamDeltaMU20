@@ -1,0 +1,5 @@
+import {maskOrder} from '../../../lib/data-security';
+import {context,answer} from '../../../lib/server';
+import {parseScan} from '../../../lib/operations';
+export const dynamic='force-dynamic';
+export async function GET(req){try{const c=await context(req);if(c.error)return c.error;if(!c.member)return answer({error:'Login required.'},401);const scan=parseScan(new URL(req.url).searchParams.get('scan')),db=c.db,w=c.member.workspace;let o=await db.prepare('SELECT * FROM orders WHERE workspace=? AND deleted=0 AND (number=? OR tracking=?) LIMIT 1').bind(w,scan,scan).first();if(!o&&scan.startsWith('ORDER ')){const rows=(await db.prepare("SELECT * FROM orders WHERE workspace=? AND deleted=0 AND (?='ORDER ' || number OR substr(?,1,length(number)+7)='ORDER ' || number || ' ') ORDER BY length(number) DESC LIMIT 1").bind(w,scan,scan).all()).results;o=rows[0]}if(!o)return answer({error:'No matching order in your workspace.'},404);return answer({order:maskOrder(o,c.member.role)})}catch(e){return answer({error:e.message||'Unable to read the label.'},400)}}

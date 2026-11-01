@@ -1,0 +1,3 @@
+export function authHeaders(){try{const a=JSON.parse(sessionStorage.getItem('bs-active-account')||'null');return a?{'X-Blindspot-Account':a.username,'X-Blindspot-Role':a.role}:{}}catch{return {}}}
+export function rememberAccount(account){sessionStorage.setItem('bs-active-account',JSON.stringify({username:account.username,role:account.role}));localStorage.setItem('bs-account-version',Date.now().toString());window.dispatchEvent(new Event('bs-account-changed'))}
+export function clearAccount(){sessionStorage.removeItem('bs-active-account');localStorage.setItem('bs-account-version',Date.now().toString());window.dispatchEvent(new Event('bs-account-changed'))}

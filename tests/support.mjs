@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {faqAnswer,modelInstructions,supportEmail} from '../lib/help.js';
+import {hasAIKey,getAIKey} from '../lib/ai-credentials.js';
+assert.match(faqAnswer('Can packaging process confirmation?').answer,/Packaging employees can process Packaging only/);
+assert.match(faqAnswer('Where is my order status?').answer,/cannot look up private/);
+assert.match(faqAnswer('Hourly email summary').answer,/not active/);
+assert.match(faqAnswer('How do I download reports?').answer,/Weekly analysis/);
+assert.match(faqAnswer('unrelated question about a space rocket').answer,/cannot access or change private orders/);
+assert.match(modelInstructions(),/Never request real passwords/);
+let count=1,owned=false,queries=[];const db={prepare(sql){queries.push(sql);return {bind(...args){queries.push(args);return this},async first(){return sql.includes('service_config')?{phone:'+919999999999'}:{count}},async all(){return {results:[]}},async run(){return {meta:{changes:1}}}}}};
+const env={DB:db};const context=async()=>owned?{user:{email:supportEmail},member:{role:'admin'}}:{error:Response.json({error:'No session'},{status:401})};const answer=(x,status=200)=>Response.json(x,{status});const source=fs.readFileSync('app/api/support/route.js','utf8').replace(/^import .*;\n/gm,'').replaceAll('export const ','const ').replaceAll('export async function ','async function ');let modelCalled=0,failModel=false;const fetchMock=async()=>{modelCalled++;if(failModel)return Response.json({error:{code:'billing_not_active'}},{status:429});return Response.json({output:[{content:[{type:'output_text',text:'An AI test response.'}]}]})};const api=new Function('env','context','answer','originOK','digest','supportEmail','faqAnswer','modelInstructions','hasAIKey','getAIKey','recordError','fetch',source+';return {GET,POST}')(env,context,answer,r=>r.headers.get('origin')===new URL(r.url).origin,async()=> 'test-hash',supportEmail,faqAnswer,modelInstructions,hasAIKey,getAIKey,async()=>{},fetchMock);
+const post=b=>api.POST(new Request('https://test.local/api/support',{method:'POST',headers:{origin:'https://test.local'},body:JSON.stringify(b)}));
+let r=await api.GET(new Request('https://test.local/api/support'));let body=await r.json();assert.equal(body.email,supportEmail);assert.equal(body.aiEnabled,false);assert.equal(body.canManage,false);
+r=await post({action:'chat',question:'Which department can process packaging?',conversation:'qa'});body=await r.json();assert.equal(body.source,'faq');assert.equal(modelCalled,0);assert(queries.includes('INSERT INTO support_chats(id,conversation,question,answer,source,created) VALUES(?,?,?,?,?,?)'));
+r=await post({action:'contact',phone:'+919999999999'});assert.equal(r.status,403);
+r=await api.GET(new Request('https://test.local/api/support?inbox=1'));assert.equal(r.status,403);
+r=await post({action:'ticket',name:'QA',email:'not-an-email',subject:'Problem',message:'A sufficiently long test message.'});assert.equal(r.status,400);
+r=await post({action:'ticket',name:'QA',email:'qa@example.com',subject:'Problem',message:'A sufficiently long test message.'});body=await r.json();assert.equal(r.status,200);assert.match(body.id,/^BS-/);
+count=999;r=await post({action:'chat',question:'help'});assert.equal(r.status,429);count=1;
+owned=true;r=await post({action:'contact',phone:'123'});assert.equal(r.status,400);r=await post({action:'contact',phone:'+919999999999'});assert.equal(r.status,200);r=await api.GET(new Request('https://test.local/api/support?inbox=1'));body=await r.json();assert(Array.isArray(body.tickets));
+env.OPENAI_API_KEY='not-a-real-key';r=await post({action:'chat',question:'How do roles work?'});body=await r.json();assert.equal(body.source,'ai');assert.equal(body.answer,'An AI test response.');assert.equal(modelCalled,1);
+console.log('Passed FAQ grounding, privacy boundaries, honest FAQ/AI modes, support-ticket validation/storage, rate limits, owner-only inbox/contact controls, phone validation and mocked model-response parsing.');
+
+failModel=true;r=await post({action:'chat',question:'How do roles work?'});body=await r.json();assert.equal(body.source,'faq');assert.match(body.notice,/Live AI is unavailable/);assert(!JSON.stringify(body).includes('billing_not_active'));console.log('Passed honest AI-unavailable fallback without exposing provider errors.');

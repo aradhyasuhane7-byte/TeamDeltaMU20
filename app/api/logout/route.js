@@ -1,0 +1,3 @@
+import {env} from 'cloudflare:workers';
+import {digest,sessionToken,sessionCookie} from '../../../lib/auth';
+export async function POST(req){if(req.headers.get('origin')!==new URL(req.url).origin)return new Response('Forbidden',{status:403});const token=sessionToken(req);if(token)await env.DB.prepare('DELETE FROM sessions WHERE token=?').bind(await digest(token)).run();const headers=new Headers();headers.append('Set-Cookie',sessionCookie('',0));headers.append('Set-Cookie','bs_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0'+(import.meta.env.DEV?'':'; Secure'));return Response.json({ok:true},{headers})}

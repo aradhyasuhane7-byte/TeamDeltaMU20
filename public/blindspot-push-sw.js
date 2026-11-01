@@ -1,0 +1,3 @@
+self.addEventListener('push',event=>{let data={};try{data=event.data?.json()||{}}catch{}event.waitUntil(self.registration.showNotification(data.title||'Blindspot handoff',{body:data.body||'Open Blindspot to check your department queue.',icon:'/favicon.svg',badge:'/favicon.svg',tag:data.tag||'blindspot-handoff',data:{url:['/admin','/confirm','/pack','/doc','/del'].includes(data.url)?data.url:'/'} }));});
+self.addEventListener('notificationclick',event=>{event.notification.close();const path=event.notification.data?.url||'/';event.waitUntil(clients.openWindow(new URL(path,self.location.origin).href));});
+self.addEventListener('activate',event=>event.waitUntil(clients.claim()));
